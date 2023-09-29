@@ -19,13 +19,25 @@
 #include "AY3891x.h"
 #include "AY3891x_sounds.h"  // Contains the divisor values for the musical notes
 
-// Be sure to use the correct pin numbers for your setup.
-//          DA7, DA6, DA5, DA4, DA3, DA2, DA1, DA0, BDIR, BC2, BC1
+#ifdef ESP32
+
+AY3891x psg( 13, 12,   14,   27,   26,   25,   33,   32,   4,  16,  17);
+const int clockPin = 10;
+const int freq = 1000000;
+const int clockChannel = 0;
+const int resolution = 2;
+
+void clockSetup()
+{
+  ledcSetup(clockChannel, freq, resolution);
+  ledcAttachPin(clockPin, clockChannel);
+  ledcWrite(clockChannel, 2);
+}
+
+#else
+
 AY3891x psg( A3,   8,   7,   6,   5,   4,   3,   2,   A2,  A1,  A0);
 
-#ifdef ARDUINO_ARCH_AVR
-#define HARDWARE_GENERATED_CLOCK  // Comment this line if not using supported microcontroller
-#ifdef HARDWARE_GENERATED_CLOCK
 // The following code generates a 1 MHz 50% duty cycle output to be used
 // as the clock signal for the AY-3-891x chip.
 // Note that the following code is hardware-specific. It works on certain Atmega
@@ -42,7 +54,7 @@ static void clockSetup()
   OCR1AH = 0;
   OCR1AL = DIVISOR;
 }
-#endif
+
 #endif
 
 const int notes_to_play[] = {
@@ -51,8 +63,11 @@ const int notes_to_play[] = {
 };
 
 void setup() {
-#ifdef HARDWARE_GENERATED_CLOCK
-  // Hardware-specific microcontroller code to generate a clock signal for the AY-3-891x chip
+
+#ifdef ESP32
+  clockSetup();
+#else
+// Hardware-specific microcontroller code to generate a clock signal for the AY-3-891x chip
   pinMode(clkOUT, OUTPUT);
   digitalWrite(clkOUT, LOW);
   clockSetup();
