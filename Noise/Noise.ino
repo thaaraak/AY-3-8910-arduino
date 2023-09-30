@@ -18,26 +18,12 @@
 
 #include "AY3891x.h"
 #include "AY3891x_sounds.h"  // Contains the divisor values for the musical notes
-//#include "chiptunes_f15.h"
-//#include "chiptunes_ultima.h"
-//#include "chiptunes_wolfgang.h"
-#include "chiptunes_testdrive.h"
-//#include "chiptunes_lemmings.h"
-//#include "chiptunes_drwho.h"
-//#include "chiptunes_hype.h"
-//#include "chiptunes_aura.h"
-
-
-size_t data_index = 0;
-unsigned long prev_micros;
-// Write the data at a rate of 50 Hz <-> every 20000 us
-#define INTERVAL 20000
 
 #ifdef ESP32
 
 AY3891x psg( 13, 12,   14,   27,   26,   25,   33,   32,   4,  16,  17);
 const int clockPin = 10;
-const int freq = 3000000;
+const int freq = 2000000;
 const int clockChannel = 0;
 const int resolution = 2;
 
@@ -58,7 +44,7 @@ AY3891x psg( A3,   8,   7,   6,   5,   4,   3,   2,   A2,  A1,  A0);
 // chips (including Arduino UNO), but will not work on all microcontrollers
 // without modification
 static const byte clkOUT = 9;
-const byte DIVISOR = 3; // Set for 1MHz clock
+const byte DIVISOR = 7; // Set for 1MHz clock
 static void clockSetup()
 {
   TCCR1A = (1 << COM1A0);
@@ -71,11 +57,17 @@ static void clockSetup()
 
 #endif
 
+const int notes_to_play[] = {
+  C_4, C_4S, D_4, D_4S, E_4, F_4, F_4S, G_4, G_4S, A_4, A_4S, B_4,
+  A_4S, A_4, G_4S, G_4, F_4S, F_4, E_4, D_4S, D_4, C_4S
+};
+
 void setup() {
+
 #ifdef ESP32
   clockSetup();
 #else
-  // Hardware-specific microcontroller code to generate a clock signal for the AY-3-891x chip
+// Hardware-specific microcontroller code to generate a clock signal for the AY-3-891x chip
   pinMode(clkOUT, OUTPUT);
   digitalWrite(clkOUT, LOW);
   clockSetup();
@@ -88,31 +80,34 @@ void setup() {
 
   psg.begin();
 
+  psg.write(AY3891x::ChA_Amplitude, 0x0B); // Lower amplitude
+  psg.write(AY3891x::ChB_Amplitude, 0x0B); // Mid amplitude
+  psg.write(AY3891x::Enable_Reg, ~(MIXER_NOISE_B_DISABLE ));
+
+
+  
 }
 
-
-byte i = 3;
-int delayval = 50;
+byte noiseval = 1;
+int delayval = 100;
 int iterations = 100;
+int vol = 0x0b;
 
-void loop()
-{
-  byte i;
+void loop() {
 
-  if (micros() - prev_micros > INTERVAL)
-  {
-    prev_micros = micros();
+/*
+    if ( noiseval >= 32 )
+      noiseval = 1;
+*/
+    if ( vol < 0 )
+      vol = 0x0b;
+      
+    psg.write(AY3891x::ChB_Amplitude, vol);
 
-    for (i= 0; i < 14; i++) {
-      psg.write(i, pgm_read_byte(&psg_data[data_index++]));
-    }
+    psg.write(AY3891x::Noise_Period_Reg, noiseval);
 
-    if (data_index >= sizeof(psg_data)) {
-      psg.write(AY3891x::Enable_Reg, MIXER_NOISES_DISABLE | MIXER_TONES_DISABLE | psg.read(AY3891x::Enable_Reg));
-      while (1);
-      // Or... you can re-start the song:
-      //  data_index = 0;
-    }
-  }
+    delay(delayval);
 
+    vol--;
+  //  noiseval++;
 }
