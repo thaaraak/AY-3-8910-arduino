@@ -91,23 +91,24 @@ void setup() {
 byte noiseval = 1;
 int delayval = 100;
 int iterations = 100;
-int vol = 0x0b;
+int vol = 0x0f;
 
 void loop() {
 
-/*
+
     if ( noiseval >= 32 )
       noiseval = 1;
-*/
-    if ( vol < 0 )
-      vol = 0x0b;
-      
-    psg.write(AY3891x::ChB_Amplitude, vol);
 
+    if ( vol < 0 )
+    {
+      vol = 0x0f;
+      noiseval++;
+    }
+    
+    psg.write(AY3891x::ChB_Amplitude, vol);
     psg.write(AY3891x::Noise_Period_Reg, noiseval);
 
     delay(delayval);
 
     vol--;
-  //  noiseval++;
 }
