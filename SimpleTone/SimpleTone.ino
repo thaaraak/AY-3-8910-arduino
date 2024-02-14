@@ -93,7 +93,7 @@ void setup() {
 }
 
 byte i = 3;
-int delayval = 50;
+int delayval = 200;
 int iterations = 100;
 
 void loop() {

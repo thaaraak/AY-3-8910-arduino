@@ -21,9 +21,9 @@
 //#include "chiptunes_f15.h"
 //#include "chiptunes_ultima.h"
 //#include "chiptunes_wolfgang.h"
-#include "chiptunes_testdrive.h"
+//#include "chiptunes_testdrive.h"
 //#include "chiptunes_lemmings.h"
-//#include "chiptunes_drwho.h"
+#include "chiptunes_drwho.h"
 //#include "chiptunes_hype.h"
 //#include "chiptunes_aura.h"
 

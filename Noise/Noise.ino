@@ -89,7 +89,7 @@ void setup() {
 }
 
 byte noiseval = 1;
-int delayval = 100;
+int delayval = 80;
 int iterations = 100;
 int vol = 0x0f;
 
